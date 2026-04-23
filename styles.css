@@ -66,6 +66,19 @@ video {
   border-radius: 12px;
   font-size: 0.95rem;
 }
+.tap-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.62);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  z-index: 2;
+  pointer-events: none;
+}
 .floating-btn {
   position: absolute;
   top: 12px;
@@ -81,11 +94,6 @@ video {
 }
 .floating-left { left: 12px; }
 .floating-right { right: 12px; }
-.floating-bottom-right {
-  top: auto;
-  right: 12px;
-  bottom: 12px;
-}
 .control { display: block; margin-bottom: 14px; }
 .control span { display: block; margin-bottom: 8px; }
 input[type="range"] { width: 100%; }
@@ -155,15 +163,12 @@ button.primary:active { background: var(--accent-dark); }
   aspect-ratio: auto;
   border-radius: 0;
 }
-.video-card.manual-fullscreen .permission-hint {
+.video-card.manual-fullscreen .permission-hint,
+.video-card.manual-fullscreen .tap-hint {
   bottom: max(12px, env(safe-area-inset-bottom));
 }
 .video-card.manual-fullscreen .floating-btn {
   top: max(12px, env(safe-area-inset-top));
-}
-.video-card.manual-fullscreen .floating-bottom-right {
-  top: auto;
-  bottom: max(12px, env(safe-area-inset-bottom));
 }
 @media (orientation: landscape) {
   #app { max-width: 1000px; }

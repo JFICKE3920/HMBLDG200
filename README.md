@@ -1,13 +1,11 @@
-# Cubicle Camera Web App v3
+# Cubicle Camera Web App v4
 
-This version adds:
-- fullscreen pause/resume button on the camera screen
-- camera zoom when supported by the browser/camera
-- portrait or landscape viewing modes
-- fullscreen button
-- iPhone-friendly manual fullscreen fallback
+This version changes fullscreen control:
+- In fullscreen mode, tap the video area to pause or resume monitoring
+- Small helper text appears briefly in fullscreen
+- Zoom, portrait/landscape view, and fullscreen are still included
 
 ## Notes
-- The small pause button only shows while the app is in fullscreen mode.
-- Zoom only works when the browser exposes camera zoom capabilities.
-- On iPhone Safari, orientation lock may not work even though the app supports both portrait and landscape layouts.
+- Tap-to-pause only works while fullscreen is active
+- Buttons in the fullscreen overlay still work normally
+- Zoom only works when the browser exposes camera zoom capabilities

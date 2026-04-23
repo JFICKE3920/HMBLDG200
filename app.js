@@ -7,6 +7,7 @@ const motionValue = document.getElementById("motionValue");
 const viewModeText = document.getElementById("viewModeText");
 const permissionHint = document.getElementById("permissionHint");
 const alertOverlay = document.getElementById("alertOverlay");
+const fullscreenTapHint = document.getElementById("fullscreenTapHint");
 
 const thresholdInput = document.getElementById("threshold");
 const cooldownInput = document.getElementById("cooldown");
@@ -23,7 +24,6 @@ const stopMonitorBtn = document.getElementById("stopMonitorBtn");
 const testAlertBtn = document.getElementById("testAlertBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 const swapOrientationBtn = document.getElementById("swapOrientationBtn");
-const pauseOverlayBtn = document.getElementById("pauseOverlayBtn");
 const videoCard = document.getElementById("videoCard");
 const videoShell = document.getElementById("videoShell");
 
@@ -36,6 +36,7 @@ let lastTriggerTime = 0;
 let landscapeView = false;
 let manualFullscreen = false;
 let zoomCapabilities = null;
+let tapHintTimeout = null;
 
 function loadSettings() {
   const savedThreshold = localStorage.getItem("cubicle-threshold");
@@ -52,7 +53,7 @@ function loadSettings() {
 
   syncLabels();
   applyViewMode();
-  updatePauseButton();
+  updateFullscreenTapBehavior();
 }
 
 function saveSettings() {
@@ -79,10 +80,25 @@ function isFullscreenLike() {
   return Boolean(document.fullscreenElement) || manualFullscreen;
 }
 
-function updatePauseButton() {
-  const show = isFullscreenLike();
-  pauseOverlayBtn.classList.toggle("hidden", !show);
-  pauseOverlayBtn.textContent = monitoring ? "Pause" : "Resume";
+function showTapHintTemporarily() {
+  if (!isFullscreenLike()) {
+    fullscreenTapHint.classList.add("hidden");
+    return;
+  }
+  fullscreenTapHint.classList.remove("hidden");
+  clearTimeout(tapHintTimeout);
+  tapHintTimeout = setTimeout(() => {
+    fullscreenTapHint.classList.add("hidden");
+  }, 1800);
+}
+
+function updateFullscreenTapBehavior() {
+  const active = isFullscreenLike();
+  if (!active) {
+    fullscreenTapHint.classList.add("hidden");
+    return;
+  }
+  showTapHintTemporarily();
 }
 
 thresholdInput.addEventListener("input", () => { syncLabels(); saveSettings(); });
@@ -94,20 +110,12 @@ zoomInput.addEventListener("input", async () => {
   await applyZoom();
 });
 
-swapOrientationBtn.addEventListener("click", async () => {
+swapOrientationBtn.addEventListener("click", async (event) => {
+  event.stopPropagation();
   landscapeView = !landscapeView;
   applyViewMode();
   saveSettings();
   await tryLockOrientation();
-});
-
-pauseOverlayBtn.addEventListener("click", () => {
-  if (monitoring) {
-    stopMonitoring();
-  } else {
-    startMonitoring();
-  }
-  updatePauseButton();
 });
 
 async function startCamera() {
@@ -199,7 +207,6 @@ function stopMonitoring() {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
-  updatePauseButton();
 }
 
 function startMonitoring() {
@@ -210,8 +217,19 @@ function startMonitoring() {
   monitoring = true;
   statusText.textContent = "Monitoring";
   previousFrame = null;
-  updatePauseButton();
   processFrame();
+}
+
+function toggleMonitoringFromFullscreenTap() {
+  if (!isFullscreenLike()) return;
+  if (!stream) return;
+
+  if (monitoring) {
+    stopMonitoring();
+  } else {
+    startMonitoring();
+  }
+  showTapHintTemporarily();
 }
 
 function processFrame() {
@@ -290,7 +308,9 @@ function playBeep() {
   }
 }
 
-async function toggleFullscreen() {
+async function toggleFullscreen(event) {
+  if (event) event.stopPropagation();
+
   try {
     if (document.fullscreenElement) {
       await document.exitFullscreen();
@@ -298,14 +318,14 @@ async function toggleFullscreen() {
       document.body.classList.remove("fullscreen-mode");
       videoCard.classList.remove("manual-fullscreen");
       fullscreenBtn.textContent = "Fullscreen";
-      updatePauseButton();
+      updateFullscreenTapBehavior();
       return;
     }
 
     if (videoCard.requestFullscreen) {
       await videoCard.requestFullscreen();
       fullscreenBtn.textContent = "Exit Fullscreen";
-      updatePauseButton();
+      updateFullscreenTapBehavior();
       return;
     }
   } catch (error) {
@@ -316,14 +336,14 @@ async function toggleFullscreen() {
   document.body.classList.toggle("fullscreen-mode", manualFullscreen);
   videoCard.classList.toggle("manual-fullscreen", manualFullscreen);
   fullscreenBtn.textContent = manualFullscreen ? "Exit Fullscreen" : "Fullscreen";
-  updatePauseButton();
+  updateFullscreenTapBehavior();
 }
 
 document.addEventListener("fullscreenchange", () => {
   const active = Boolean(document.fullscreenElement);
   fullscreenBtn.textContent = active ? "Exit Fullscreen" : "Fullscreen";
   if (!active) document.body.classList.remove("fullscreen-mode");
-  updatePauseButton();
+  updateFullscreenTapBehavior();
 });
 
 async function tryLockOrientation() {
@@ -340,15 +360,15 @@ window.addEventListener("orientationchange", () => {
   viewModeText.textContent = isLandscapeNow ? "Landscape" : "Portrait";
 });
 
+videoShell.addEventListener("click", (event) => {
+  const clickedButton = event.target.closest("button");
+  if (clickedButton) return;
+  toggleMonitoringFromFullscreenTap();
+});
+
 startCameraBtn.addEventListener("click", startCamera);
-startMonitorBtn.addEventListener("click", () => {
-  startMonitoring();
-  updatePauseButton();
-});
-stopMonitorBtn.addEventListener("click", () => {
-  stopMonitoring();
-  updatePauseButton();
-});
+startMonitorBtn.addEventListener("click", startMonitoring);
+stopMonitorBtn.addEventListener("click", stopMonitoring);
 testAlertBtn.addEventListener("click", triggerAlert);
 fullscreenBtn.addEventListener("click", toggleFullscreen);
 
