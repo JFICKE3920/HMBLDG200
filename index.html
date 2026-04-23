@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Cubicle Camera</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#b22222" />
@@ -20,21 +20,20 @@
     </header>
 
     <section class="status-card">
-      <div class="status-row">
-        <span>Status</span>
-        <strong id="statusText">Idle</strong>
-      </div>
-      <div class="status-row">
-        <span>Motion</span>
-        <strong id="motionValue">0.0%</strong>
-      </div>
+      <div class="status-row"><span>Status</span><strong id="statusText">Idle</strong></div>
+      <div class="status-row"><span>Motion</span><strong id="motionValue">0.0%</strong></div>
+      <div class="status-row"><span>View</span><strong id="viewModeText">Portrait</strong></div>
     </section>
 
-    <section class="video-card">
-      <video id="video" playsinline autoplay muted></video>
-      <canvas id="hiddenCanvas" width="64" height="48" aria-hidden="true"></canvas>
-      <div id="permissionHint" class="permission-hint">
-        Tap <strong>Start Camera</strong> and allow camera access.
+    <section class="video-card" id="videoCard">
+      <div class="video-shell" id="videoShell">
+        <video id="video" playsinline autoplay muted></video>
+        <canvas id="hiddenCanvas" width="64" height="48" aria-hidden="true"></canvas>
+        <div id="permissionHint" class="permission-hint">
+          Tap <strong>Start Camera</strong> and allow camera access.
+        </div>
+        <button id="fullscreenBtn" class="floating-btn floating-right">Fullscreen</button>
+        <button id="swapOrientationBtn" class="floating-btn floating-left">Landscape View</button>
       </div>
     </section>
 
@@ -48,6 +47,13 @@
         <span>Cooldown: <strong id="cooldownLabel">3.0 sec</strong></span>
         <input id="cooldown" type="range" min="1" max="10" step="0.5" value="3" />
       </label>
+
+      <label class="control">
+        <span>Zoom: <strong id="zoomLabel">1.0×</strong></span>
+        <input id="zoom" type="range" min="1" max="1" step="0.1" value="1" disabled />
+      </label>
+
+      <div id="zoomHint" class="minor-note">Zoom becomes available when the browser and selected camera support it.</div>
 
       <label class="toggle">
         <input id="soundEnabled" type="checkbox" checked />
@@ -67,7 +73,8 @@
       <ul>
         <li>Use HTTPS when hosting this on a phone.</li>
         <li>Add it to your iPhone Home Screen for a more app-like feel.</li>
-        <li>Motion detection works best when the phone stays still.</li>
+        <li>Fullscreen works best from a Home Screen web app.</li>
+        <li>Landscape and portrait are both supported; lock is best-effort only.</li>
       </ul>
     </section>
   </div>
