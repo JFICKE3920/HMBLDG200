@@ -81,6 +81,11 @@ video {
 }
 .floating-left { left: 12px; }
 .floating-right { right: 12px; }
+.floating-bottom-right {
+  top: auto;
+  right: 12px;
+  bottom: 12px;
+}
 .control { display: block; margin-bottom: 14px; }
 .control span { display: block; margin-bottom: 8px; }
 input[type="range"] { width: 100%; }
@@ -133,7 +138,7 @@ button.primary:active { background: var(--accent-dark); }
   padding: 22px 28px;
   border-radius: 18px;
 }
-.hidden { display: none; }
+.hidden { display: none !important; }
 .video-card.manual-fullscreen {
   position: fixed;
   inset: 0;
@@ -155,6 +160,10 @@ button.primary:active { background: var(--accent-dark); }
 }
 .video-card.manual-fullscreen .floating-btn {
   top: max(12px, env(safe-area-inset-top));
+}
+.video-card.manual-fullscreen .floating-bottom-right {
+  top: auto;
+  bottom: max(12px, env(safe-area-inset-bottom));
 }
 @media (orientation: landscape) {
   #app { max-width: 1000px; }

@@ -23,6 +23,7 @@ const stopMonitorBtn = document.getElementById("stopMonitorBtn");
 const testAlertBtn = document.getElementById("testAlertBtn");
 const fullscreenBtn = document.getElementById("fullscreenBtn");
 const swapOrientationBtn = document.getElementById("swapOrientationBtn");
+const pauseOverlayBtn = document.getElementById("pauseOverlayBtn");
 const videoCard = document.getElementById("videoCard");
 const videoShell = document.getElementById("videoShell");
 
@@ -51,6 +52,7 @@ function loadSettings() {
 
   syncLabels();
   applyViewMode();
+  updatePauseButton();
 }
 
 function saveSettings() {
@@ -73,6 +75,16 @@ function applyViewMode() {
   viewModeText.textContent = landscapeView ? "Landscape" : "Portrait";
 }
 
+function isFullscreenLike() {
+  return Boolean(document.fullscreenElement) || manualFullscreen;
+}
+
+function updatePauseButton() {
+  const show = isFullscreenLike();
+  pauseOverlayBtn.classList.toggle("hidden", !show);
+  pauseOverlayBtn.textContent = monitoring ? "Pause" : "Resume";
+}
+
 thresholdInput.addEventListener("input", () => { syncLabels(); saveSettings(); });
 cooldownInput.addEventListener("input", () => { syncLabels(); saveSettings(); });
 soundEnabled.addEventListener("change", saveSettings);
@@ -87,6 +99,15 @@ swapOrientationBtn.addEventListener("click", async () => {
   applyViewMode();
   saveSettings();
   await tryLockOrientation();
+});
+
+pauseOverlayBtn.addEventListener("click", () => {
+  if (monitoring) {
+    stopMonitoring();
+  } else {
+    startMonitoring();
+  }
+  updatePauseButton();
 });
 
 async function startCamera() {
@@ -172,12 +193,13 @@ async function applyZoom() {
 
 function stopMonitoring() {
   monitoring = false;
-  statusText.textContent = "Idle";
+  statusText.textContent = "Paused";
   previousFrame = null;
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
     animationFrameId = null;
   }
+  updatePauseButton();
 }
 
 function startMonitoring() {
@@ -188,6 +210,7 @@ function startMonitoring() {
   monitoring = true;
   statusText.textContent = "Monitoring";
   previousFrame = null;
+  updatePauseButton();
   processFrame();
 }
 
@@ -232,7 +255,9 @@ function processFrame() {
     lastTriggerTime = now;
     statusText.textContent = "Motion detected";
     triggerAlert();
-    setTimeout(() => { if (monitoring) statusText.textContent = "Monitoring"; }, 900);
+    setTimeout(() => {
+      if (monitoring) statusText.textContent = "Monitoring";
+    }, 900);
   }
 
   animationFrameId = requestAnimationFrame(processFrame);
@@ -240,7 +265,6 @@ function processFrame() {
 
 function triggerAlert() {
   alertOverlay.classList.remove("hidden");
-
   if (soundEnabled.checked) playBeep();
   if (navigator.vibrate) navigator.vibrate([180, 100, 180]);
 
@@ -274,12 +298,14 @@ async function toggleFullscreen() {
       document.body.classList.remove("fullscreen-mode");
       videoCard.classList.remove("manual-fullscreen");
       fullscreenBtn.textContent = "Fullscreen";
+      updatePauseButton();
       return;
     }
 
     if (videoCard.requestFullscreen) {
       await videoCard.requestFullscreen();
       fullscreenBtn.textContent = "Exit Fullscreen";
+      updatePauseButton();
       return;
     }
   } catch (error) {
@@ -290,12 +316,14 @@ async function toggleFullscreen() {
   document.body.classList.toggle("fullscreen-mode", manualFullscreen);
   videoCard.classList.toggle("manual-fullscreen", manualFullscreen);
   fullscreenBtn.textContent = manualFullscreen ? "Exit Fullscreen" : "Fullscreen";
+  updatePauseButton();
 }
 
 document.addEventListener("fullscreenchange", () => {
   const active = Boolean(document.fullscreenElement);
   fullscreenBtn.textContent = active ? "Exit Fullscreen" : "Fullscreen";
   if (!active) document.body.classList.remove("fullscreen-mode");
+  updatePauseButton();
 });
 
 async function tryLockOrientation() {
@@ -313,8 +341,14 @@ window.addEventListener("orientationchange", () => {
 });
 
 startCameraBtn.addEventListener("click", startCamera);
-startMonitorBtn.addEventListener("click", startMonitoring);
-stopMonitorBtn.addEventListener("click", stopMonitoring);
+startMonitorBtn.addEventListener("click", () => {
+  startMonitoring();
+  updatePauseButton();
+});
+stopMonitorBtn.addEventListener("click", () => {
+  stopMonitoring();
+  updatePauseButton();
+});
 testAlertBtn.addEventListener("click", triggerAlert);
 fullscreenBtn.addEventListener("click", toggleFullscreen);
 
