@@ -53,6 +53,7 @@ video {
   display: block;
   object-fit: cover;
   background: #000;
+  transform: scaleX(-1); /* flips it back to normal */
 }
 #hiddenCanvas { display: none; }
 .permission-hint {
