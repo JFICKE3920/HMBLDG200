@@ -296,14 +296,28 @@ async function setTorch(on) {
   }
 }
 
-function screenFlash(durationMs = 450) {
-  screenFlashOverlay.classList.remove("hidden");
-  setTimeout(() => screenFlashOverlay.classList.add("hidden"), durationMs);
+function screenFlash(durationMs = 140) {
+  // Pulse the whole screen several times. This is used for the front camera
+  // because the physical LED is on the rear side of the phone.
+  const pulseCount = 3;
+  const gapMs = 90;
+
+  for (let i = 0; i < pulseCount; i++) {
+    const startMs = i * (durationMs + gapMs);
+    setTimeout(() => {
+      screenFlashOverlay.classList.remove("hidden");
+    }, startMs);
+
+    setTimeout(() => {
+      screenFlashOverlay.classList.add("hidden");
+    }, startMs + durationMs);
+  }
 }
 
 async function runMotionFlash(durationMs = 450) {
   if (!flashEnabled.checked) return;
 
+  // Rear camera: try the physical flashlight first.
   if (cameraFacingMode === "environment" && torchSupported) {
     const turnedOn = await setTorch(true);
     if (turnedOn) {
@@ -312,7 +326,8 @@ async function runMotionFlash(durationMs = 450) {
     }
   }
 
-  screenFlash(durationMs);
+  // Front camera, or rear torch unsupported: use bright screen pulses.
+  screenFlash();
 }
 
 async function testFlash() {

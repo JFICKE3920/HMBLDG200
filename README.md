@@ -1,13 +1,7 @@
-# Cubicle Camera Web App v7 Professional
+# Cubicle Camera Web App v8
 
-A polished full UI version with:
-- Professional camera-first design
-- Front/rear camera switch
-- Rear physical torch when supported
-- Front screen flash fallback
-- Flash on Motion toggle
-- Test Flash and Test Alert
-- Zoom when supported
-- Portrait/landscape view
-- Fullscreen mode
-- Tap fullscreen video to pause/resume monitoring
+Fixes front-camera flashing:
+- Front camera now uses three bright white screen pulses.
+- Rear camera still tries the physical torch first.
+- If rear torch is unsupported, it falls back to screen pulses.
+- Includes cache-busting query strings for GitHub Pages.
