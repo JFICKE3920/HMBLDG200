@@ -1,11 +1,21 @@
-# Cubicle Camera Web App v4
+# Cubicle Camera Web App v6
 
-This version changes fullscreen control:
-- In fullscreen mode, tap the video area to pause or resume monitoring
-- Small helper text appears briefly in fullscreen
-- Zoom, portrait/landscape view, and fullscreen are still included
+This is the full UI version with the upgrades restored.
 
-## Notes
-- Tap-to-pause only works while fullscreen is active
-- Buttons in the fullscreen overlay still work normally
-- Zoom only works when the browser exposes camera zoom capabilities
+## Included
+- Full UI
+- Front / rear camera switch
+- Rear physical torch flash when supported
+- Front screen flash fallback
+- Flash on Motion toggle
+- Test Flash button
+- Zoom slider when supported
+- Portrait / landscape view toggle
+- Fullscreen mode
+- Tap fullscreen video to pause/resume monitoring
+- Front camera mirror correction
+
+## Flash behavior
+- Rear camera: tries the physical flashlight/torch first.
+- Front camera: uses a bright white screen flash.
+- If rear torch is unsupported by the browser, the app falls back to screen flash.
