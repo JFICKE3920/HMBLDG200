@@ -1,89 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Cubicle Camera</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#b22222" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="Cubicle Camera" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <link rel="stylesheet" href="styles.css" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cubicle Camera</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div id="app">
-    <header class="header">
-      <h1>Cubicle Camera</h1>
-      <p class="subtext">Phone-friendly motion detection in Safari</p>
-    </header>
+<video id="video" autoplay playsinline></video>
 
-    <section class="status-card">
-      <div class="status-row"><span>Status</span><strong id="statusText">Idle</strong></div>
-      <div class="status-row"><span>Motion</span><strong id="motionValue">0.0%</strong></div>
-      <div class="status-row"><span>View</span><strong id="viewModeText">Portrait</strong></div>
-    </section>
+<div class="controls">
+<button onclick="startCamera()">Start Camera</button>
+<button onclick="toggleCamera()">Switch Camera</button>
+<button onclick="toggleMonitoring()">Start/Stop Monitoring</button>
+<label><input type="checkbox" id="flashToggle"> Flash on Motion</label>
+</div>
 
-    <section class="video-card" id="videoCard">
-      <div class="video-shell" id="videoShell">
-        <video id="video" playsinline autoplay muted></video>
-        <canvas id="hiddenCanvas" width="64" height="48" aria-hidden="true"></canvas>
-        <div id="permissionHint" class="permission-hint">
-          Tap <strong>Start Camera</strong> and allow camera access.
-        </div>
-        <div id="fullscreenTapHint" class="tap-hint hidden">Tap video to pause or resume monitoring</div>
-        <button id="fullscreenBtn" class="floating-btn floating-right">Fullscreen</button>
-        <button id="swapOrientationBtn" class="floating-btn floating-left">Landscape View</button>
-      </div>
-    </section>
-
-    <section class="controls-card">
-      <label class="control">
-        <span>Sensitivity Threshold: <strong id="thresholdLabel">12.0%</strong></span>
-        <input id="threshold" type="range" min="1" max="40" step="0.5" value="12" />
-      </label>
-
-      <label class="control">
-        <span>Cooldown: <strong id="cooldownLabel">3.0 sec</strong></span>
-        <input id="cooldown" type="range" min="1" max="10" step="0.5" value="3" />
-      </label>
-
-      <label class="control">
-        <span>Zoom: <strong id="zoomLabel">1.0×</strong></span>
-        <input id="zoom" type="range" min="1" max="1" step="0.1" value="1" disabled />
-      </label>
-
-      <div id="zoomHint" class="minor-note">Zoom becomes available when the browser and selected camera support it.</div>
-
-      <label class="toggle">
-        <input id="soundEnabled" type="checkbox" checked />
-        <span>Sound Alert</span>
-      </label>
-
-      <div class="button-grid">
-        <button id="startCameraBtn" class="primary">Start Camera</button>
-        <button id="startMonitorBtn">Start Monitoring</button>
-        <button id="stopMonitorBtn">Stop</button>
-        <button id="testAlertBtn">Test Alert</button>
-      </div>
-    </section>
-
-    <section class="notes-card">
-      <h2>Notes</h2>
-      <ul>
-        <li>Use HTTPS when hosting this on a phone.</li>
-        <li>Add it to your iPhone Home Screen for a more app-like feel.</li>
-        <li>In fullscreen mode, tap the video area to pause or resume monitoring.</li>
-        <li>Landscape and portrait are both supported; lock is best-effort only.</li>
-      </ul>
-    </section>
-  </div>
-
-  <div id="alertOverlay" class="alert-overlay hidden">
-    <div class="alert-box">MOTION DETECTED</div>
-  </div>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
