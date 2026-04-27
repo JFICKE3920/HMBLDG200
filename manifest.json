@@ -3,8 +3,8 @@
   "short_name": "Cubicle Camera",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4efe8",
-  "theme_color": "#b22222",
+  "background_color": "#0f172a",
+  "theme_color": "#111827",
   "orientation": "any",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },

@@ -3,6 +3,7 @@ const canvas = document.getElementById("hiddenCanvas");
 const ctx = canvas.getContext("2d", { willReadFrequently: true });
 
 const statusText = document.getElementById("statusText");
+const statusPill = document.getElementById("statusPill");
 const motionValue = document.getElementById("motionValue");
 const viewModeText = document.getElementById("viewModeText");
 const cameraModeText = document.getElementById("cameraModeText");
@@ -46,6 +47,12 @@ let torchSupported = false;
 let tapHintTimeout = null;
 let cameraFacingMode = "user";
 
+function setStatus(text, mode = "") {
+  statusText.textContent = text;
+  statusPill.classList.remove("monitoring", "alert");
+  if (mode) statusPill.classList.add(mode);
+}
+
 function loadSettings() {
   const savedThreshold = localStorage.getItem("cubicle-threshold");
   const savedCooldown = localStorage.getItem("cubicle-cooldown");
@@ -88,7 +95,7 @@ function syncLabels() {
 
 function applyViewMode() {
   videoShell.classList.toggle("landscape-view", landscapeView);
-  swapOrientationBtn.textContent = landscapeView ? "Portrait View" : "Landscape View";
+  swapOrientationBtn.textContent = landscapeView ? "Portrait" : "Landscape";
   viewModeText.textContent = landscapeView ? "Landscape" : "Portrait";
 }
 
@@ -107,13 +114,13 @@ function updateFlashUi() {
   }
 
   if (cameraFacingMode === "user") {
-    flashStatusText.textContent = "Screen Flash";
+    flashStatusText.textContent = "Screen";
   } else if (!stream) {
     flashStatusText.textContent = "Not checked";
   } else if (torchSupported) {
-    flashStatusText.textContent = "Rear Torch Ready";
+    flashStatusText.textContent = "Torch";
   } else {
-    flashStatusText.textContent = "Screen Fallback";
+    flashStatusText.textContent = "Screen";
   }
 }
 
@@ -142,10 +149,7 @@ function updateFullscreenTapBehavior() {
 thresholdInput.addEventListener("input", () => { syncLabels(); saveSettings(); });
 cooldownInput.addEventListener("input", () => { syncLabels(); saveSettings(); });
 soundEnabled.addEventListener("change", saveSettings);
-flashEnabled.addEventListener("change", () => {
-  saveSettings();
-  updateFlashUi();
-});
+flashEnabled.addEventListener("change", () => { saveSettings(); updateFlashUi(); });
 zoomInput.addEventListener("input", async () => {
   syncLabels();
   saveSettings();
@@ -162,7 +166,7 @@ swapOrientationBtn.addEventListener("click", async (event) => {
 
 async function startCamera() {
   try {
-    statusText.textContent = "Requesting camera...";
+    setStatus("Requesting...");
     stopCameraStream();
 
     stream = await navigator.mediaDevices.getUserMedia({
@@ -179,7 +183,7 @@ async function startCamera() {
     await video.play();
 
     permissionHint.style.display = "none";
-    statusText.textContent = "Camera ready";
+    setStatus("Camera Ready");
 
     applyCameraViewState();
     await setupZoomControl();
@@ -187,8 +191,8 @@ async function startCamera() {
     await tryLockOrientation();
   } catch (error) {
     console.error(error);
-    statusText.textContent = "Camera access failed";
-    permissionHint.innerHTML = "Camera access failed. Use HTTPS and allow camera access in Safari.";
+    setStatus("Camera Failed", "alert");
+    permissionHint.innerHTML = "<strong>Camera access failed</strong><span>Use HTTPS and allow camera access.</span>";
   }
 }
 
@@ -322,7 +326,7 @@ async function testFlash() {
 
 function stopMonitoring() {
   monitoring = false;
-  statusText.textContent = "Paused";
+  setStatus("Paused");
   previousFrame = null;
   if (animationFrameId) {
     cancelAnimationFrame(animationFrameId);
@@ -332,11 +336,11 @@ function stopMonitoring() {
 
 function startMonitoring() {
   if (!stream) {
-    statusText.textContent = "Start camera first";
+    setStatus("Start Camera");
     return;
   }
   monitoring = true;
-  statusText.textContent = "Monitoring";
+  setStatus("Monitoring", "monitoring");
   previousFrame = null;
   processFrame();
 }
@@ -389,11 +393,11 @@ function processFrame() {
 
   if (percentChanged >= threshold && now - lastTriggerTime >= cooldownMs) {
     lastTriggerTime = now;
-    statusText.textContent = "Motion detected";
+    setStatus("Motion", "alert");
     triggerAlert();
     runMotionFlash(450);
     setTimeout(() => {
-      if (monitoring) statusText.textContent = "Monitoring";
+      if (monitoring) setStatus("Monitoring", "monitoring");
     }, 900);
   }
 
@@ -444,7 +448,7 @@ async function toggleFullscreen(event) {
 
     if (videoCard.requestFullscreen) {
       await videoCard.requestFullscreen();
-      fullscreenBtn.textContent = "Exit Fullscreen";
+      fullscreenBtn.textContent = "Exit";
       updateFullscreenTapBehavior();
       return;
     }
@@ -455,13 +459,13 @@ async function toggleFullscreen(event) {
   manualFullscreen = !manualFullscreen;
   document.body.classList.toggle("fullscreen-mode", manualFullscreen);
   videoCard.classList.toggle("manual-fullscreen", manualFullscreen);
-  fullscreenBtn.textContent = manualFullscreen ? "Exit Fullscreen" : "Fullscreen";
+  fullscreenBtn.textContent = manualFullscreen ? "Exit" : "Fullscreen";
   updateFullscreenTapBehavior();
 }
 
 document.addEventListener("fullscreenchange", () => {
   const active = Boolean(document.fullscreenElement);
-  fullscreenBtn.textContent = active ? "Exit Fullscreen" : "Fullscreen";
+  fullscreenBtn.textContent = active ? "Exit" : "Fullscreen";
   if (!active) document.body.classList.remove("fullscreen-mode");
   updateFullscreenTapBehavior();
 });
